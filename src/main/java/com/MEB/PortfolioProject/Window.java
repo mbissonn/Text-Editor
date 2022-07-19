@@ -7,17 +7,15 @@ public class Window extends JFrame {
     // INSTANCE VARIABLES
 
     private final JTextArea area = new JTextArea();
-    private final JFrame frame;
+    private final JFrame frame = new JFrame("Text Edit");
     private final FileManager fileManager = new FileManager();
-    private final FileMenu fileMenu = new FileMenu(area, fileManager);
+    private final FileMenu fileMenu = new FileMenu(area, fileManager, frame);
 
     //CONSTRUCTOR
 
     public Window() {
 
         // JFRAME DEFAULT ATTRIBUTES
-
-        frame = new JFrame("Text Edit");
 
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.add(area);
