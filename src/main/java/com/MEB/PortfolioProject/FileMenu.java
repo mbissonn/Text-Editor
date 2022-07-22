@@ -9,19 +9,19 @@ public class FileMenu implements ActionListener {
     // INSTANCE VARIABLES
 
     private final FileManager fileManager;
-    private final JTextArea area;
     private final JMenu menu;
+    private final Window window;
+    private final JTextArea area;
+    private final DialogueBuilder dialogueBuilder;
+    private final WindowManager windowManager;
+    private int returnValue = 0;
+
     private final JMenuItem menuItemNew = new JMenuItem("New Window");
     private final JMenuItem menuItemOpen = new JMenuItem("Open");
     private final JMenuItem menuItemSaveAs = new JMenuItem("Save as");
     private final JMenuItem menuItemSave = new JMenuItem("Save");
     private final JMenuItem menuItemClose = new JMenuItem("Close Window");
     private final JMenuItem menuItemQuit = new JMenuItem("Quit");
-
-    private final JFrame jFrame;
-
-    private File file;
-    private int returnValue = 0;
 
     private KeyStroke keyStrokeToNew = KeyStroke.getKeyStroke(KeyEvent.VK_N, KeyEvent.CTRL_DOWN_MASK);
     private KeyStroke keyStrokeToOpen = KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_DOWN_MASK);
@@ -31,14 +31,16 @@ public class FileMenu implements ActionListener {
 
     // CONSTRUCTOR
 
-    public FileMenu(JTextArea area, FileManager fileManager, JFrame jFrame) {
+    public FileMenu(JTextArea area, FileManager fileManager, Window window, WindowManager windowManager) {
 
         // INITIALIZE INSTANCE VARIABLES
 
-        this.jFrame = jFrame;
+        this.windowManager = windowManager;
+        this.window = window;
+        this.area = window.getArea();
         this.fileManager = fileManager;
-        this.area = area;
         this.menu = new JMenu("File");
+        this.dialogueBuilder = new DialogueBuilder(this, fileManager, windowManager);
 
         // CREATE ACTION LISTENERS FOR MENU OPTIONS
 
@@ -78,7 +80,7 @@ public class FileMenu implements ActionListener {
         String thisActionEvent = actionEvent.getActionCommand();
         switch (thisActionEvent) {
             case "New Window":
-                Window newWindow = new Window();
+                Window newWindow = new Window(windowManager);
                 break;
             case "Open":
                 open();
@@ -87,13 +89,13 @@ public class FileMenu implements ActionListener {
                 saveAs();
                 break;
             case "Save":
-                fileManager.saveFile(area, file);
+                fileManager.saveFile(area, fileManager.getFile());
                 break;
             case "Close Window":
-                jFrame.dispose();
+                dialogueBuilder.saveOnCloseDialogue(window, area);
                 break;
             case "Quit":
-                System.exit(0);
+                windowManager.closeAllWindows();
         }
     }
 
@@ -102,8 +104,8 @@ public class FileMenu implements ActionListener {
     public void open() {
         returnValue = fileManager.setReturnValue("Open");
         if (returnValue == JFileChooser.APPROVE_OPTION) {
-            file = fileManager.openFile(area);
-            jFrame.setTitle(file.getName());
+            fileManager.setFile(fileManager.openFile(area));
+            window.setTitle(fileManager.getFile().getName());
             if (!menuItemSave.isEnabled()) {
                 menuItemSave.setEnabled(true);
             }
@@ -112,8 +114,8 @@ public class FileMenu implements ActionListener {
 
     public void saveAs() {
         returnValue = fileManager.setReturnValue("Save as");
-        file = fileManager.saveFileAs(area);
-        jFrame.setTitle(file.getName());
+        fileManager.setFile(fileManager.saveFileAs(area));
+        window.setTitle(fileManager.getFile().getName());
         if (!menuItemSave.isEnabled()) {
             menuItemSave.setEnabled(true);
         }
@@ -125,6 +127,13 @@ public class FileMenu implements ActionListener {
         return menu;
     }
 
+    public JMenuItem getMenuItemSave() {
+        return menuItemSave;
+    }
+
+    public DialogueBuilder getDialogueBuilder() {
+        return dialogueBuilder;
+    }
 }
 
 

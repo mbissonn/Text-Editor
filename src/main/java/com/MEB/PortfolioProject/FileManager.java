@@ -10,6 +10,7 @@ public class FileManager {
 
     // INSTANCE VARIABLES
 
+    private File file;
     private final JFileChooser jFileChooser = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
 
     //CONSTRUCTOR
@@ -86,4 +87,17 @@ public class FileManager {
         }
         return 0;
     }
+
+    // GETTERS
+
+    public File getFile() {
+        return file;
+    }
+
+    // SETTERS
+
+    public void setFile(File file) {
+        this.file = file;
+    }
+
 }
