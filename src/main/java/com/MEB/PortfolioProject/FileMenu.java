@@ -89,10 +89,10 @@ public class FileMenu implements ActionListener {
                 saveAs();
                 break;
             case "Save":
-                fileManager.saveFile(area, fileManager.getFile());
+                save();
                 break;
             case "Close Window":
-                dialogueBuilder.saveOnCloseDialogue(window, area);
+                closeWindow();
                 break;
             case "Quit":
                 windowManager.closeAllWindows();
@@ -115,9 +115,26 @@ public class FileMenu implements ActionListener {
     public void saveAs() {
         returnValue = fileManager.setReturnValue("Save as");
         fileManager.setFile(fileManager.saveFileAs(area));
-        window.setTitle(fileManager.getFile().getName());
-        if (!menuItemSave.isEnabled()) {
-            menuItemSave.setEnabled(true);
+        if (fileManager.getFile() != null) {
+            window.setTitle(fileManager.getFile().getName());
+            if (!menuItemSave.isEnabled()) {
+                menuItemSave.setEnabled(true);
+            }
+            window.setChanged(false);
+        }
+    }
+
+    public void save() {
+        fileManager.saveFile(area, fileManager.getFile());
+        window.setChanged(false);
+    }
+
+    public void closeWindow() {
+        if (window.isChanged()) {
+            dialogueBuilder.saveOnCloseDialogue(window, area);
+        } else {
+            windowManager.removeWindow(window);
+            window.getFrame().dispose();
         }
     }
 

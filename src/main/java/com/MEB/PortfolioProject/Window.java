@@ -1,6 +1,9 @@
 package com.MEB.PortfolioProject;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -13,9 +16,10 @@ public class Window extends JFrame {
     private final FileManager fileManager = new FileManager();
     private final FileMenu fileMenu;
     private final DialogueBuilder dialogueBuilder;
-    private final WindowManager windowManager;
 
     private final Window window = this;
+
+    private boolean changed = false;
 
     //CONSTRUCTOR
 
@@ -23,33 +27,65 @@ public class Window extends JFrame {
 
         // WINDOW MANAGEMENT
 
-        this.windowManager = windowManager;
         windowManager.addWindow(this);
         this.fileMenu = new FileMenu(area, fileManager, this, windowManager);
         this.dialogueBuilder = fileMenu.getDialogueBuilder();
 
-        // JFRAME DEFAULT ATTRIBUTES
+        // ADD JTEXTAREA TO JFRAME, SIZE, AND ADD DOC LISTENER
 
-        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.add(area);
         frame.setSize(960, 720);
 
-        // INITIALIZE CLOSING SAVE PROMPT
+        area.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                if (!changed) {
+                    changed = true;
+                }
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                if (!changed) {
+                    changed = true;
+                }
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                if (!changed) {
+                    changed = true;
+                }
+            }
+        });
+
+        // INITIALIZE CLOSING OPERATION
+
+        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
         frame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent we) {
-                dialogueBuilder.saveOnCloseDialogue(window, area);
+                if (window.isChanged()) {
+                    dialogueBuilder.saveOnCloseDialogue(window, area);
+                } else {
+                    windowManager.removeWindow(window);
+                    window.getFrame().dispose();
+                }
             }
         });
 
-        // MENU OPTIONS
+        // ADD MENU TO JFRAME
 
         JMenuBar windowMenuBar = new JMenuBar();
 
         windowMenuBar.add(fileMenu.getMenu());
 
         frame.setJMenuBar(windowMenuBar);
+
+        // SET JFRAME LOCATION AND MAKE VISIBLE
+
+        frame.setLocation(windowManager.newWindowLocation(frame));
 
         frame.setVisible(true);
 
@@ -61,6 +97,10 @@ public class Window extends JFrame {
         return frame;
     }
 
+    public boolean isChanged() {
+        return changed;
+    }
+
     public JTextArea getArea() {
         return area;
     }
@@ -69,4 +109,9 @@ public class Window extends JFrame {
         return fileMenu;
     }
 
+    // SETTERS
+
+    public void setChanged(boolean changed) {
+        this.changed = changed;
+    }
 }
